@@ -1,4 +1,6 @@
-![banner]
+<img src="ui/logo.png" width="200" align="right">
+
+
 # What api-hub does?
 `api-hub` is very simple repository for storing, serving and invoking REST API.
 
