@@ -10,7 +10,7 @@ info:
     name: Apache 2.0
     url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
   x-logo:
-    url: 'https://raw.githubusercontent.com/vvalchev/api-hub/ui/logo.png'
+    url: 'https://raw.githubusercontent.com/vvalchev/api-hub/master/ui/logo.png'
 externalDocs:
   description: Find out how to use it in your organization.
   url: 'https://github.com/vvalchev/api-hub'
