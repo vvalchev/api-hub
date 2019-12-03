@@ -1,0 +1,83 @@
+<!-- HTML for static distribution bundle build -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>api-hub / swagger</title>
+    <link rel="stylesheet" type="text/css" href="./swagger-ui.css" >
+    <link rel="icon" type="image/png" href="./favicon.png" />
+    <style>
+      html
+      {
+        box-sizing: border-box;
+        overflow: -moz-scrollbars-vertical;
+        overflow-y: scroll;
+      }
+
+      *,
+      *:before,
+      *:after
+      {
+        box-sizing: inherit;
+      }
+
+      body
+      {
+        margin:0;
+        background: #fafafa;
+      }
+
+      div#swagger-ui div.topbar {
+        background-color:#fff;
+        border-bottom:1px solid #e5e5e5;
+      }
+      div#swagger-ui div.topbar * {
+        color:#333;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="swagger-ui"></div>
+
+    <script src="./swagger-ui-bundle.js"> </script>
+    <script src="./swagger-ui-standalone-preset.js"> </script>
+    <script>
+    function rebrand() {
+      var w = document.getElementsByClassName('topbar-wrapper')[0];
+      w.firstChild.setAttribute('href', '/redoc.html');
+      w.firstChild.innerHTML = '<img src="/logo_transparent.png" height="40px" alt="toggle view" title="toggle view"/> <span style="font-size: 15px">Swagger</span> | <span style="font-size: 10px">Redoc</span>';
+    }
+    function buildUI(urls) {
+      const ui = SwaggerUIBundle({
+        urls: urls,
+        dom_id: '#swagger-ui',
+        deepLinking: true,
+        displayRequestDuration: true,
+        showCommonExtensions: true,
+        presets: [
+          SwaggerUIBundle.presets.apis,
+          SwaggerUIStandalonePreset
+        ],
+        plugins: [
+          SwaggerUIBundle.plugins.DownloadUrl
+        ],
+        layout: "StandaloneLayout"
+      });
+      window.ui = ui;
+      rebrand();
+    }
+
+    window.onload = function() {
+      (async () => {
+        const data = await (await fetch('/api/v1/docs')).json();
+        data.forEach(resource => {
+          resource.url = resource.url.replace("<<baseurl>>", window.location.origin)
+        })
+        buildUI(data);
+      })();
+    }
+
+  </script>
+  </body>
+</html>

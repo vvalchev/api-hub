@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>api-hub / redoc</title>
+    <!-- needed for adaptive design -->
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" type="image/png" href="./favicon.png" />
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:300,400,700|Roboto:300,400,700" rel="stylesheet">
+
+    <!--
+    ReDoc doesn't change outer page styles
+    -->
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+      }
+      .site-header, .site-header select {
+        font-family: sans-serif;
+        font-weight: bold;
+      }
+      .site-header {
+          background-color:#fff;
+          position:fixed;
+          width:100%;
+          top:0;
+          border-bottom:1px solid #e5e5e5;
+          z-index:100;
+          overflow:hidden
+      }
+      .site-nav {
+          width:100vw;
+          line-height:3.5rem
+      }
+      .site-nav .page-link {
+          position:relative;
+          display:inline-block;
+          vertical-align:middle;
+          color:#333;
+          padding:0 .5rem;
+          text-decoration: none;
+      }
+      .page-content{
+          padding-top:3.5rem;
+          min-height:calc(100vh - 7rem)
+      }
+      </style>
+  </head>
+  <body>
+    <header class="site-header" id="menu">
+
+      <nav class="site-nav">
+        <a class="page-link" href="/">
+          <img src="/logo_transparent.png" style="height: 40px; vertical-align: middle; margin-left: 12px"/>
+          <span style="font-size: 10px">Swagger</span>
+          | <span style="font-size: 15px">Redoc</span>
+        </a>
+        <div class="page-link" style="float: right">
+          <label>Select a definition</label>
+          <select id="select" onchange="selectUrl(this)">
+            <option value="1">&nbsp;</option>
+          </select>
+        </div>
+      </nav>
+    </header>
+    <div class="page-content" id="content">
+      <redoc spec-url='http://petstore.swagger.io/v2/swagger.json' scroll-y-offset="#menu" hideSingleRequestSampleTab="false"></redoc>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/redoc@next/bundles/redoc.standalone.js"> </script>
+    <script type="text/javascript">
+
+      function selectUrl(t) {
+        Redoc.init(t.value, {
+          scrollYOffset: '#menu'
+        }, document.getElementById('content'))
+        // update the history url with the selected item
+        history.replaceState({url: t.value}, null, '?d=' + t.value);
+      }
+
+      function buildUI(urls) {
+        // get the select and remove all children
+        var select = document.getElementById('select');
+        while (select.firstChild) {
+          select.firstChild.remove();
+        }
+        // create all child nodes
+        urls.forEach(url => {
+          var opt = document.createElement('option');
+          opt.innerText = url.name + " " + url.version;
+          opt.setAttribute("value", url.url);
+          select.appendChild(opt);
+        })
+        // check if the url is provided as parameter
+        let link = (new URL(document.location)).searchParams.get('d');
+        if (link) {
+          select.value = link;
+        }
+        // trigger a change, so the things get loaded
+        select.onchange();
+      }
+
+      window.onload = function() {
+        (async () => {
+          const data = await (await fetch('/api/v1/docs')).json();
+          data.forEach(resource => {
+            resource.url = resource.url.replace("<<baseurl>>", window.location.origin)
+          })
+          buildUI(data);
+        })();
+      }
+    </script>
+  </body>
+</html>

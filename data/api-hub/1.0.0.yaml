@@ -1,0 +1,143 @@
+openapi: 3.0.1
+info:
+  version: '1.0.0'
+  title: Api Hub
+  description: Managing REST documentation the easy way.
+  contact:
+    email: contact@example.com
+    url: 'https://github.com/vvalchev/api-hub'
+  license:
+    name: Apache 2.0
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+  x-logo:
+    url: 'https://raw.githubusercontent.com/vvalchev/api-hub/ui/logo.png'
+externalDocs:
+  description: Find out how to use it in your organization.
+  url: 'https://github.com/vvalchev/api-hub'
+servers:
+- url: <<baseurl>>/api/v1 # This is special! Don't change!
+
+x-types:
+  - &id
+      type: string
+      description: Unique document identifier known to the API creator.
+      pattern: '^[a-z]+([a-z_\-])?[a-z]+'
+      example: identity-api
+      maxLength: 30
+  - &version
+      type: string
+      description: The version of the documentation
+      pattern: '^(?:(\d+)\.)?(?:(\d+)\.)?(\*|\d+)(-\w+)?$'
+      example: 1.0.0
+  - &name
+      type: string
+      description: User-friendly name of the API, that is shown to the user.
+      example: 'Identity API v1.0.0'
+      maxLength: 255
+
+paths:
+  '/docs':
+    get:
+      description: Retrieve a summary of available documentation
+      operationId: getDocs
+      responses:
+        '200':
+          description: The list of documents that can be loaded directly from swagger-ui, via "urls" configuration parameter.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ApiUrl'
+
+    post:
+      description: Registers a new API with the system.
+      operationId: createDoc
+      requestBody:
+        required: true
+        content:
+          multipart/form-data: # Media type
+            schema:
+                $ref: '#/components/schemas/ApiDescription'
+      responses:
+        '400':
+          description: Failed
+          content: {}
+        '200':
+          description: Successful operation
+          content: {}
+
+
+  '/docs/{id}/{version}':
+    # parameters list that are used with each operation for this path
+    parameters:
+    - $ref: '#/components/parameters/IdParameter'
+    - $ref: '#/components/parameters/VerParameter'
+
+    get:
+      description: Gets the Swagger/Open API for a particular entry.
+      operationId: getDoc
+      responses:
+        '200':
+          description: Successful operation
+          content: {}
+        '404':
+          description: Document not found
+          content: {}
+
+    delete:
+      description: Removes particular Swagger/Open API entry.
+      operationId: deleteDoc
+      responses:
+        '200':
+          description: Successful operation
+          content: {}
+        '404':
+          description: Document not found
+          content: {}
+
+components:
+  parameters:
+    IdParameter:
+      name: id
+      in: path
+      required: true
+      schema:
+        <<: *id
+    VerParameter:
+      name: version
+      in: path
+      required: true
+      schema:
+        <<: *version
+  schemas:
+    ApiDescription:    # Request payload
+      description: Upload Payload
+      type: object
+      required: [ version, name, document ]
+      properties:      # Request parts
+        id:
+          <<: *id
+        version:
+          <<: *version
+        name:
+          <<: *name
+        document:      # Part 3 (document)
+          type: string
+          description: A Swagger/Open API document.
+          format: binary
+
+    ApiUrl:
+      type: object
+      description: Information about hosted API.
+      required: [ url, name ]
+      properties:
+        url:
+          type: string
+          format: url
+        id:
+          <<: *id
+        version:
+          <<: *version
+        name:
+          <<: *name
