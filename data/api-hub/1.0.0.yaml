@@ -66,6 +66,16 @@ paths:
         '200':
           description: Successful operation
           content: {}
+      x-code-samples:
+        - lang: Curl
+          source: |
+            curl -X POST "http://localhost:10000/api/v1/docs" \
+              -H "accept: */*" \
+              -H "Content-Type: multipart/form-data" \
+              -F "id=identity-api" \
+              -F "version=1.0.0" \
+              -F "name=Identity API v1.0.0" \
+              -F "document=@identity-api.yaml;type=application/x-yaml"
 
 
   '/docs/{id}/{version}':
